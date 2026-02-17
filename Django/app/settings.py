@@ -1,0 +1,9 @@
+SECRET_KEY = "replace-me"
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
+INSTALLED_APPS = []
+MIDDLEWARE = []
+ROOT_URLCONF = "app.urls"
+TEMPLATES = []
+WSGI_APPLICATION = "app.wsgi.application"
+DATABASES = { "default": { "ENGINE": "django.db.backends.sqlite3", "NAME": "db.sqlite3" } }

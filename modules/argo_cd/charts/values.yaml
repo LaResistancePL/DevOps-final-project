@@ -1,0 +1,7 @@
+applications:
+  - name: django-app
+    repoURL: https://github.com/REPLACE_ME/REPLACE_ME.git
+    path: charts/django-app
+    targetRevision: main
+    namespace: default
+repositories: []

@@ -1,0 +1,13 @@
+image:
+  repository: REPLACE_ME_ECR_REPO
+  tag: "latest"
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8000
+
+env:
+  DJANGO_SETTINGS_MODULE: "app.settings"
+  DEBUG: "true"
