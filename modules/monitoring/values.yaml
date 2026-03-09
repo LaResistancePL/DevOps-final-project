@@ -1,7 +1,10 @@
 grafana:
   service:
     type: ClusterIP
-  adminPassword: "admin"
+  adminPassword: "${grafana_admin_password}"
+  defaultDashboardsTimezone: utc
 prometheus:
   service:
     type: ClusterIP
+alertmanager:
+  enabled: true

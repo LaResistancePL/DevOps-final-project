@@ -1,58 +1,89 @@
-# Final Project — AWS DevOps Automation (Terraform + EKS + Jenkins + Argo CD + Monitoring)
+# GOIT DevOps Final Project
 
-This repository is a **ready-to-fill template** matching the required course structure.
+## Architecture Overview
 
-## What this template includes
-- Terraform root wiring with module stubs for:
-  - S3 backend (state bucket + DynamoDB lock)
-  - VPC
-  - ECR
-  - EKS (+ optional EBS CSI add-on placeholder)
-  - RDS/Aurora (switchable)
-  - Jenkins (Helm)
-  - Argo CD (Helm) + GitOps "apps" chart scaffold
-  - Monitoring (Prometheus + Grafana via Helm; kube-prometheus-stack)
-- Helm chart scaffold for a Django app
-- Django app folder scaffold with Dockerfile + Jenkinsfile placeholders
+- **Networking:** custom AWS VPC with public and private subnets across two Availability Zones
+- **Compute:** Amazon EKS managed node group for Kubernetes workloads
+- **Registry:** Amazon ECR repository for application container images
+- **Database:** Amazon RDS MySQL instance for Django persistence
+- **CI:** Jenkins deployed via Helm into Kubernetes
+- **CD / GitOps:** Argo CD deployed via Helm and configured to watch the application chart
+- **Monitoring:** kube-prometheus-stack with Prometheus and Grafana
+- **Application:** sample Django application deployed via Helm chart
 
-> ⚠️ This is a **template**. You must fill variables (names, CIDRs, Git repo URLs, secrets),
-> and adjust versions (EKS, Helm charts) to match your environment.
+## Repository Structure
 
-## Quick start (suggested workflow)
+- `bootstrap/backend/` — bootstrap stack for Terraform state backend (S3 + DynamoDB)
+- `modules/` — reusable Terraform modules for AWS and Kubernetes platform components
+- `charts/django-app/` — Helm chart used to deploy the sample application
+- `Django/` — sample Django application, Dockerfile, requirements, Jenkinsfile
+- `backend.hcl.example` — example backend configuration for S3 remote state
+- `terraform.tfvars.example` — example project variables
 
-### 1) Create backend first (recommended)
-1. `cd modules/s3-backend`
-2. `terraform init`
-3. `terraform apply`
-4. Copy outputs (bucket + table names) into **root** `backend.tf`
+## Deployment Sequence
 
-### 2) Deploy the full infra
-1. From repo root:
-   - `terraform init -reconfigure`
-   - `terraform apply`
-2. Configure kubeconfig:
-   - `aws eks update-kubeconfig --region <REGION> --name <CLUSTER_NAME>`
+### 1. Bootstrap the Terraform backend
 
-### 3) Verify namespaces
-- `kubectl get all -n jenkins`
-- `kubectl get all -n argocd`
-- `kubectl get all -n monitoring`
+```bash
+cd bootstrap/backend
+terraform init
+terraform apply
+```
 
-### 4) Port-forward checks
-- Jenkins:
-  - `kubectl port-forward svc/jenkins 8080:8080 -n jenkins`
-- Argo CD:
-  - `kubectl port-forward svc/argocd-server 8081:443 -n argocd`
-- Grafana:
-  - `kubectl port-forward svc/grafana 3000:80 -n monitoring`
+Use the outputs from the bootstrap stack to create `backend.hcl` from `backend.hcl.example`.
 
-### 5) Destroy (avoid costs)
-- `terraform destroy`
+### 2. Prepare example variable files
 
-> When you destroy everything, you also remove S3/DynamoDB used for state (unless you keep them separately).
+```bash
+cp backend.hcl.example backend.hcl
+cp terraform.tfvars.example terraform.tfvars
+```
 
-## Repository structure
-Matches the provided course structure (modules/, charts/, Django/).
+Update the example values as needed for a specific AWS account, Git repository branch, and target environment before a live deployment.
 
----
-If you want, replace placeholders with your real values and run apply. 
+### 3. Initialize and apply the root project
+
+```bash
+terraform init -backend-config=backend.hcl -reconfigure
+terraform plan
+terraform apply
+```
+
+### 4. Configure local kubectl context
+
+```bash
+aws eks update-kubeconfig --region eu-central-1 --name $(terraform output -raw eks_cluster_name)
+```
+
+### 5. Verify platform namespaces
+
+```bash
+kubectl get all -n jenkins
+kubectl get all -n argocd
+kubectl get all -n monitoring
+```
+
+### 6. Access key services with port-forwarding
+
+```bash
+kubectl port-forward svc/jenkins 8080:8080 -n jenkins
+kubectl port-forward svc/argocd-server 8081:443 -n argocd
+kubectl port-forward svc/kube-prometheus-stack-grafana 3000:80 -n monitoring
+```
+
+## Expected CI/CD Flow
+
+1. A code change is pushed to the Git repository.
+2. Jenkins checks out the repository and builds a Docker image for the Django app.
+3. Jenkins tags and pushes the image to Amazon ECR.
+4. Jenkins updates the Helm chart image tag in `charts/django-app/values.yaml`.
+5. Argo CD detects the Git change and synchronizes the application into EKS.
+6. Prometheus scrapes application metrics from `/metrics` and Grafana visualizes them.
+
+
+## Clean Up
+
+```bash
+terraform destroy
+```
+

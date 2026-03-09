@@ -1,3 +1,6 @@
-# OPTIONAL: EBS CSI add-on (may be enabled depending on course requirements)
-# Leaving as placeholder to avoid apply failures in some environments.
-# You can implement IRSA + aws_eks_addon here if required.
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name                = module.eks.cluster_name
+  addon_name                  = "aws-ebs-csi-driver"
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+}

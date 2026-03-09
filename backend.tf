@@ -1,10 +1,6 @@
-# Fill after creating S3 + DynamoDB via modules/s3-backend
+# 1) First create the backend using: cd bootstrap/backend && terraform apply
+# 2) Copy real names from outputs into backend.hcl
+# 3) Run: terraform init -backend-config=backend.hcl -reconfigure
 terraform {
-  backend "s3" {
-    bucket         = "REPLACE_ME"
-    key            = "final-project/terraform.tfstate"
-    region         = "eu-central-1"
-    dynamodb_table = "REPLACE_ME"
-    encrypt        = true
-  }
+  backend "s3" {}
 }

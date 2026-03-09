@@ -4,7 +4,10 @@ resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags = merge(var.tags, { Name = "${var.project_name}-vpc" })
+
+  tags = merge(var.tags, {
+    Name = "${var.project_name}-vpc"
+  })
 }
 
 resource "aws_internet_gateway" "igw" {
@@ -21,7 +24,8 @@ resource "aws_subnet" "public" {
   availability_zone       = data.aws_availability_zones.available.names[tonumber(each.key)]
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-public-${each.key}"
+    Name                     = "${var.project_name}-public-${each.key}"
+    "kubernetes.io/role/elb" = "1"
   })
 }
 
@@ -33,7 +37,8 @@ resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[tonumber(each.key)]
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-private-${each.key}"
+    Name                              = "${var.project_name}-private-${each.key}"
+    "kubernetes.io/role/internal-elb" = "1"
   })
 }
 

@@ -3,15 +3,19 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 5.50"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 3.0"
+      version = "~> 2.29"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 3.0"
+      version = "~> 2.13"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
     }
   }
 }
@@ -20,8 +24,8 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Kubernetes + Helm providers are configured **after** EKS is created.
-# They use the EKS endpoint + token.
+data "aws_caller_identity" "current" {}
+
 data "aws_eks_cluster" "this" {
   name = module.eks.cluster_name
 }

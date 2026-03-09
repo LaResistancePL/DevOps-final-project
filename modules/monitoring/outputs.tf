@@ -1,4 +1,4 @@
 output "grafana_admin_password" {
-  value     = "admin"
+  value     = random_password.grafana.result
   sensitive = true
 }
